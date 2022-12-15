@@ -10,8 +10,8 @@ play_width = 300
 play_height = 600
 block_size = 30
 
-top_left_x = (s_width - play_width) // 2
-top_left_y = s_height - play_height
+top_left_x = ((s_width - play_width) // 2)
+top_left_y = s_height - play_height - 50
 
 logo_position_x = 1
 logo_move_x = 0.5
@@ -233,7 +233,8 @@ def clear_rows(grid, locked):
 
 
 def draw_next_shape(shape, surface):
-    font = pygame.font.SysFont('comicsans', 30)
+    font = pygame.font.Font(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 80)
     label = font.render('Next Shape', 1, (255, 255, 255))
 
     sx = top_left_x + play_width + 50
@@ -244,10 +245,10 @@ def draw_next_shape(shape, surface):
         row = list(line)
         for j, column in enumerate(row):
             if column == '0':
-                pygame.draw.rect(surface, shape.color, (sx + j*block_size,
-                                 sy + i*block_size, block_size, block_size), 0)
+                pygame.draw.rect(surface, shape.color, (sx + j*block_size +
+                                 130, sy + i*block_size - 50, block_size, block_size), 0)
 
-    surface.blit(label, (sx + 10, sy - 30))
+    surface.blit(label, (sx, sy - 180))
 
 
 def update_score(nscore):
@@ -272,36 +273,64 @@ def draw_window(surface, grid, score=0, last_score=0):
     surface.fill((0, 0, 0))
 
     pygame.font.init()
-    font = pygame.font.SysFont('comicsans', 60)
-    label = font.render('Tetris', 1, (255, 255, 255))
 
-    surface.blit(label, (top_left_x + play_width /
-                 2 - (label.get_width() / 2), 30))
+    tetris_logo = pygame.image.load(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\tetris_logo.png").convert_alpha()
+    tetris_logo = pygame.transform.scale(tetris_logo, (305, 216))
+    surface.blit(tetris_logo, (90, 190))
 
-    font = pygame.font.SysFont('comicsans', 30)
-    label = font.render('Score: ' + str(score), 1, (255, 255, 255))
+    font = pygame.font.Font(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 80)
+    label = font.render('Score', 1, (255, 255, 255))
+    label2 = font.render(str(score), 1, (255, 255, 255))
 
     sx = top_left_x + play_width + 50
     sy = top_left_y + play_height/2 - 100
 
-    surface.blit(label, (sx + 20, sy + 160))
+    surface.blit(label, (sx + 100, sy + 240))
+    surface.blit(label2, (sx + 190, sy + 310))
 
-    label = font.render('High Score: ' + last_score, 1, (255, 255, 255))
+    label = font.render('High Score', 1, (255, 255, 255))
+    label2 = font.render(last_score, 1, (255, 255, 255))
 
     sx = top_left_x - 200
     sy = top_left_y + 200
 
-    surface.blit(label, (sx + 20, sy + 160))
+    surface.blit(label, (sx - 220, sy + 240))
+    surface.blit(label2, (sx - 70, sy + 310))
 
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             pygame.draw.rect(surface, grid[i][j], (top_left_x + j*block_size,
                              top_left_y + i*block_size, block_size, block_size), 0)
 
-    pygame.draw.rect(surface, (255, 0, 0), (top_left_x,
-                     top_left_y, play_width, play_height), 5)
+    pygame.draw.rect(surface, (26, 110, 167), (top_left_x,
+                     top_left_y, play_width, play_height), 3)
 
     draw_grid(surface, grid)
+
+
+def pause(win, clock):
+    
+    pygame.font.init()
+    font = pygame.font.Font(r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 150)
+    font2 = pygame.font.Font(r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 70)
+    label = font.render('Paused', 1, (255, 0, 0))
+    label2 = font2.render("Press any key to continue", 1, (255, 0, 0))
+    win.blit(label, (400, 250))
+    win.blit(label2, (250, 350))
+    
+    
+    loop = 1
+    while loop:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.display.quit()
+            if event.type == pygame.KEYDOWN:
+                win.fill((0, 0, 0))
+                loop = 0
+        pygame.display.update()
+        clock.tick(60)
 
 
 def main(win):
@@ -359,6 +388,8 @@ def main(win):
                     current_piece.rotation += 1
                     if not (valid_space(current_piece, grid)):
                         current_piece.rotation -= 1
+                if event.key == pygame.K_p:
+                    pause(win, clock)
 
         shape_pos = convert_shape_format(current_piece)
 
