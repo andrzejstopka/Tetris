@@ -3,6 +3,9 @@ import random
 
 pygame.font.init()
 pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load(r'C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\tetris_music.ogg')
+pygame.mixer.music.play(-1)
 
 s_width = 1280
 s_height = 720
@@ -133,6 +136,8 @@ class Piece(object):
         self.color = random.choice(shape_colors)
         self.rotation = 0
 
+# class Setting():
+#     def 
 
 def create_grid(locked_pos={}):
     grid = [[(0, 0, 0) for _ in range(10)] for _ in range(20)]
@@ -174,7 +179,6 @@ def valid_space(shape, grid):
                 return False
     return True
 
-
 def check_lost(positions):
     for pos in positions:
         x, y = pos
@@ -189,7 +193,7 @@ def get_shape():
 
 
 def draw_text_middle(surface, text, size, color):
-    font = pygame.font.SysFont("comicsans", size, bold=True)
+    font = pygame.font.Font( r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", size)
     label = font.render(text, 1, color)
 
     surface.blit(label, (top_left_x + play_width / 2 - (label.get_width()/2),
@@ -370,7 +374,8 @@ def main(win):
             if event.type == pygame.QUIT:
                 run = False
                 pygame.display.quit()
-
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     current_piece.x -= 1
@@ -384,6 +389,13 @@ def main(win):
                     current_piece.y += 1
                     if not (valid_space(current_piece, grid)):
                         current_piece.y -= 1
+                if event.key == pygame.K_SPACE:
+                    for i in range(20):
+                        if (valid_space(current_piece, grid)):
+                            current_piece.y = i
+                        elif not (valid_space(current_piece, grid)):
+                            break
+                    current_piece.y = i - 2
                 if event.key == pygame.K_UP:
                     current_piece.rotation += 1
                     if not (valid_space(current_piece, grid)):
@@ -412,9 +424,9 @@ def main(win):
         pygame.display.update()
 
         if check_lost(locked_positions):
-            draw_text_middle(win, "YOU LOST!", 80, (255, 255, 255))
+            draw_text_middle(win, "YOU LOST!", 120, (255, 0, 0))
             pygame.display.update()
-            pygame.time.delay(1500)
+            pygame.time.delay(3500)
             run = False
             update_score(score)
 
@@ -450,6 +462,7 @@ def main_menu(win):
 
     run = True
     while run:
+        
         logo_start_x = 0 + logo_position_x
         logo_start_y = 0 + logo_position_y
 
