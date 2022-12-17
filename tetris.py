@@ -7,6 +7,7 @@ pygame.mixer.init()
 pygame.mixer.music.load(r'C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\tetris_music.ogg')
 pygame.mixer.music.play(-1)
 
+
 s_width = 1280
 s_height = 720
 play_width = 300
@@ -20,6 +21,9 @@ logo_position_x = 1
 logo_move_x = 0.5
 logo_position_y = 1
 logo_move_y = 0.5
+
+setting_changed = False
+background = None
 
 S = [['.....',
       '.....',
@@ -136,8 +140,87 @@ class Piece(object):
         self.color = random.choice(shape_colors)
         self.rotation = 0
 
-# class Setting():
-#     def 
+class Setting():
+    default_bg = (0, 0, 0)
+    assassings_bg = pygame.image.load("backgrounds/assassins.jpg")
+    beach_bg = pygame.image.load("backgrounds/beach.jpg")
+    galaxy_bg = pygame.image.load("backgrounds/galaxy.jpg")
+    lake_bg = pygame.image.load("backgrounds/lake.jpg")
+    waterfall_bg = pygame.image.load("backgrounds/waterfall.jpg")
+    winter_bg = pygame.image.load("backgrounds/winter.jpg")
+    
+    
+    def setting_menu(self):
+        white = (255, 255, 255)
+        grey = (126, 126, 126)
+        bg_color = white
+        sound_color = white
+        while True:
+            pygame.font.init()
+            font = pygame.font.Font( r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 60)
+            choose_background_label = font.render("Choose background", 1, bg_color)
+            choose_background_label_rect = choose_background_label.get_rect(midbottom=(300, 200))
+            sound_on = True
+            if sound_on:
+                sound = font.render("Sound on", 1, sound_color)
+            elif sound_on == False:
+                sound = font.render("Sound off", 1, sound_color)
+            sound_rect = sound.get_rect(midbottom=(300, 400))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.display.quit()
+                if event.type == pygame.MOUSEMOTION:
+                    if choose_background_label_rect.collidepoint(pygame.mouse.get_pos()):
+                        bg_color = grey
+                    else:
+                        bg_color = white
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if choose_background_label_rect.collidepoint(pygame.mouse.get_pos()):
+                        self.choose_background()
+                        return
+            win.fill((0, 0, 0))
+            win.blit(choose_background_label, choose_background_label_rect)
+            win.blit(sound, sound_rect)
+            pygame.display.update()
+            
+    def choose_background(self):
+        global setting_changed
+        global background
+        assassins = pygame.transform.scale(self.assassings_bg, (320, 180)).convert_alpha()
+        assassins_rect = assassins.get_rect(midbottom = (250, 300))
+        beach = pygame.transform.scale(self.beach_bg, (320,180)).convert_alpha()
+        beach_rect = beach.get_rect(midbottom = (650, 300))
+        galaxy = pygame.transform.scale(self.galaxy_bg, (320, 180)).convert_alpha()
+        galaxy_rect = galaxy.get_rect(midbottom = (1050, 300))
+        lake = pygame.transform.scale(self.lake_bg, (320, 180)).convert_alpha()
+        lake_rect = lake.get_rect(midbottom = (250, 600))
+        waterfall = pygame.transform.scale(self.waterfall_bg, (320, 180)).convert_alpha()
+        waterfall_rect = waterfall.get_rect(midbottom = (650, 600))
+        winter = pygame.transform.scale(self.winter_bg, (320, 180)).convert_alpha()
+        winter_rect = winter.get_rect(midbottom = (1050, 600))
+        all_backgrounds = {assassins: (self.assassings_bg, assassins_rect), beach: (self.beach_bg, beach_rect), galaxy: (self.galaxy_bg, galaxy_rect), lake: (self.lake_bg, lake_rect), waterfall: (self.waterfall_bg, waterfall_rect), winter: (self.winter_bg, winter_rect)}
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.display.quit()
+                if event.type == pygame.MOUSEMOTION:
+                    for image, value in all_backgrounds.items():
+                        if value[1].collidepoint(pygame.mouse.get_pos()):
+                            image.set_alpha(64)
+                        else:
+                            image.set_alpha(255)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for image, value in all_backgrounds.items():
+                        if value[1].collidepoint(pygame.mouse.get_pos()):
+                            setting_changed = True
+                            background = value[0]
+                            return
+            win.fill((0, 0, 0))
+            for image, value in all_backgrounds.items():
+                win.blit(image, value[1])
+            pygame.display.update()
+            
+
 
 def create_grid(locked_pos={}):
     grid = [[(0, 0, 0) for _ in range(10)] for _ in range(20)]
@@ -274,8 +357,12 @@ def max_score():
 
 
 def draw_window(surface, grid, score=0, last_score=0):
-    surface.fill((0, 0, 0))
-
+    global setting_changed
+    global background
+    if setting_changed == False:
+        surface.fill((0, 0, 0))
+    else:
+        surface.blit(background, (0, 0))
     pygame.font.init()
 
     tetris_logo = pygame.image.load(
@@ -327,10 +414,12 @@ def pause(win, clock):
     
     loop = 1
     while loop:
+        pygame.mixer.music.pause()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
             if event.type == pygame.KEYDOWN:
+                pygame.mixer.music.play(-1)
                 win.fill((0, 0, 0))
                 loop = 0
         pygame.display.update()
@@ -489,7 +578,8 @@ def main_menu(win):
                 if play_rect.collidepoint(event.pos):
                     main(win)
                 elif settings_rect.collidepoint(event.pos):
-                    setting(win)
+                    settings = Setting()
+                    settings.setting_menu()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     main(win)
