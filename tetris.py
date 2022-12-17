@@ -4,7 +4,8 @@ import random
 pygame.font.init()
 pygame.init()
 pygame.mixer.init()
-pygame.mixer.music.load(r'C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\tetris_music.ogg')
+pygame.mixer.music.load(
+    r'C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\tetris_music.ogg')
 pygame.mixer.music.play(-1)
 
 
@@ -24,6 +25,7 @@ logo_move_y = 0.5
 
 setting_changed = False
 background = None
+display_grid = True
 
 S = [['.....',
       '.....',
@@ -140,6 +142,7 @@ class Piece(object):
         self.color = random.choice(shape_colors)
         self.rotation = 0
 
+
 class Setting():
     default_bg = (0, 0, 0)
     assassings_bg = pygame.image.load("backgrounds/assassins.jpg")
@@ -148,24 +151,37 @@ class Setting():
     lake_bg = pygame.image.load("backgrounds/lake.jpg")
     waterfall_bg = pygame.image.load("backgrounds/waterfall.jpg")
     winter_bg = pygame.image.load("backgrounds/winter.jpg")
-    
-    
+    ok_icon = pygame.image.load("ok_icon.png")
+    ok_icon = pygame.transform.scale(ok_icon, (150, 150))
+
     def setting_menu(self):
+        global display_grid
         white = (255, 255, 255)
         grey = (126, 126, 126)
         bg_color = white
         sound_color = white
+        display_grid_color = white
+        sound_on = True
+        all_carrots = self.carrots()
         while True:
             pygame.font.init()
-            font = pygame.font.Font( r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 60)
-            choose_background_label = font.render("Choose background", 1, bg_color)
-            choose_background_label_rect = choose_background_label.get_rect(midbottom=(300, 200))
-            sound_on = True
+            font = pygame.font.Font(
+                r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 60)
+            choose_background_label = font.render(
+                "Choose background", 1, bg_color)
+            choose_background_label_rect = choose_background_label.get_rect(
+                midleft=(100, 150))
             if sound_on:
                 sound = font.render("Sound on", 1, sound_color)
             elif sound_on == False:
                 sound = font.render("Sound off", 1, sound_color)
-            sound_rect = sound.get_rect(midbottom=(300, 400))
+            sound_rect = sound.get_rect(midleft=(100, 350))
+            if display_grid == True:
+                dg = font.render("Display grid on", 1, display_grid_color)
+            else:
+                dg = font.render("Display grid off", 1, display_grid_color)
+            dg_rect = dg.get_rect(midleft=(100, 550))
+            ok_rect = self.ok_icon.get_rect(midbottom=(1100, 680))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
@@ -174,31 +190,72 @@ class Setting():
                         bg_color = grey
                     else:
                         bg_color = white
+                    if sound_rect.collidepoint(pygame.mouse.get_pos()):
+                        sound_color = grey
+                    else:
+                        sound_color = white
+                    if dg_rect.collidepoint(pygame.mouse.get_pos()):
+                        display_grid_color = grey
+                    else:
+                        display_grid_color = white
+                    if ok_rect.collidepoint(pygame.mouse.get_pos()):
+                        self.ok_icon.set_alpha(256)
+                    else:
+                        self.ok_icon.set_alpha(150)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if choose_background_label_rect.collidepoint(pygame.mouse.get_pos()):
                         self.choose_background()
+                    if sound_rect.collidepoint(pygame.mouse.get_pos()):
+                        if sound_on == True:
+                            sound_on = False
+                            pygame.mixer.music.set_volume(0)
+                        else:
+                            sound_on = True
+                            pygame.mixer.music.set_volume(0.5)
+                    if dg_rect.collidepoint(pygame.mouse.get_pos()):
+                        if display_grid == True:
+                            display_grid = False
+                        else:
+                            display_grid = True
+                    if ok_rect.collidepoint(pygame.mouse.get_pos()):
                         return
+
             win.fill((0, 0, 0))
             win.blit(choose_background_label, choose_background_label_rect)
             win.blit(sound, sound_rect)
+            win.blit(dg, dg_rect)
+            for carrot in all_carrots:
+                print(carrot)
+                win.blit(carrot[0], (carrot[1], carrot[2]))
+            win.blit(self.ok_icon, ok_rect)
             pygame.display.update()
-            
+            for carrot in all_carrots:
+                if carrot[2] > 720:
+                    carrot[2] = -50
+                carrot[2] += random.uniform(1, 2)
+
     def choose_background(self):
         global setting_changed
         global background
-        assassins = pygame.transform.scale(self.assassings_bg, (320, 180)).convert_alpha()
-        assassins_rect = assassins.get_rect(midbottom = (250, 300))
-        beach = pygame.transform.scale(self.beach_bg, (320,180)).convert_alpha()
-        beach_rect = beach.get_rect(midbottom = (650, 300))
-        galaxy = pygame.transform.scale(self.galaxy_bg, (320, 180)).convert_alpha()
-        galaxy_rect = galaxy.get_rect(midbottom = (1050, 300))
+        assassins = pygame.transform.scale(
+            self.assassings_bg, (320, 180)).convert_alpha()
+        assassins_rect = assassins.get_rect(midbottom=(250, 300))
+        beach = pygame.transform.scale(
+            self.beach_bg, (320, 180)).convert_alpha()
+        beach_rect = beach.get_rect(midbottom=(650, 300))
+        galaxy = pygame.transform.scale(
+            self.galaxy_bg, (320, 180)).convert_alpha()
+        galaxy_rect = galaxy.get_rect(midbottom=(1050, 300))
         lake = pygame.transform.scale(self.lake_bg, (320, 180)).convert_alpha()
-        lake_rect = lake.get_rect(midbottom = (250, 600))
-        waterfall = pygame.transform.scale(self.waterfall_bg, (320, 180)).convert_alpha()
-        waterfall_rect = waterfall.get_rect(midbottom = (650, 600))
-        winter = pygame.transform.scale(self.winter_bg, (320, 180)).convert_alpha()
-        winter_rect = winter.get_rect(midbottom = (1050, 600))
-        all_backgrounds = {assassins: (self.assassings_bg, assassins_rect), beach: (self.beach_bg, beach_rect), galaxy: (self.galaxy_bg, galaxy_rect), lake: (self.lake_bg, lake_rect), waterfall: (self.waterfall_bg, waterfall_rect), winter: (self.winter_bg, winter_rect)}
+        lake_rect = lake.get_rect(midbottom=(250, 600))
+        waterfall = pygame.transform.scale(
+            self.waterfall_bg, (320, 180)).convert_alpha()
+        waterfall_rect = waterfall.get_rect(midbottom=(650, 600))
+        winter = pygame.transform.scale(
+            self.winter_bg, (320, 180)).convert_alpha()
+        winter_rect = winter.get_rect(midbottom=(1050, 600))
+        all_backgrounds = {assassins: (self.assassings_bg, assassins_rect), beach: (self.beach_bg, beach_rect), galaxy: (self.galaxy_bg, galaxy_rect), lake: (
+            self.lake_bg, lake_rect), waterfall: (self.waterfall_bg, waterfall_rect), winter: (self.winter_bg, winter_rect)}
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -219,7 +276,16 @@ class Setting():
             for image, value in all_backgrounds.items():
                 win.blit(image, value[1])
             pygame.display.update()
-            
+
+    def carrots(self):
+        carrot = pygame.image.load("carrot.png").convert_alpha()
+        carrot = pygame.transform.scale(carrot, (150, 150))
+        all_carrots = []
+        x = 600
+        for _ in range(10):
+            all_carrots.append([carrot, x, random.randint(0, 700)])
+            x += 70
+        return all_carrots
 
 
 def create_grid(locked_pos={}):
@@ -262,6 +328,7 @@ def valid_space(shape, grid):
                 return False
     return True
 
+
 def check_lost(positions):
     for pos in positions:
         x, y = pos
@@ -275,8 +342,13 @@ def get_shape():
     return Piece(5, 0, random.choice(shapes))
 
 
+def get_piece():
+    return Piece(random.randint(5, 10), 0, random.choice)
+
+
 def draw_text_middle(surface, text, size, color):
-    font = pygame.font.Font( r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", size)
+    font = pygame.font.Font(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", size)
     label = font.render(text, 1, color)
 
     surface.blit(label, (top_left_x + play_width / 2 - (label.get_width()/2),
@@ -397,21 +469,22 @@ def draw_window(surface, grid, score=0, last_score=0):
 
     pygame.draw.rect(surface, (26, 110, 167), (top_left_x,
                      top_left_y, play_width, play_height), 3)
-
-    draw_grid(surface, grid)
+    if display_grid:
+        draw_grid(surface, grid)
 
 
 def pause(win, clock):
-    
+
     pygame.font.init()
-    font = pygame.font.Font(r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 150)
-    font2 = pygame.font.Font(r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 70)
+    font = pygame.font.Font(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 150)
+    font2 = pygame.font.Font(
+        r"C:\Users\ANDRZ\Desktop\ZaRaczke\Tetris\digital_font.TTF", 70)
     label = font.render('Paused', 1, (255, 0, 0))
     label2 = font2.render("Press any key to continue", 1, (255, 0, 0))
     win.blit(label, (400, 250))
     win.blit(label2, (250, 350))
-    
-    
+
     loop = 1
     while loop:
         pygame.mixer.music.pause()
@@ -419,7 +492,7 @@ def pause(win, clock):
             if event.type == pygame.QUIT:
                 pygame.display.quit()
             if event.type == pygame.KEYDOWN:
-                pygame.mixer.music.play(-1)
+                pygame.mixer.music.unpause()
                 win.fill((0, 0, 0))
                 loop = 0
         pygame.display.update()
@@ -491,6 +564,8 @@ def main(win):
                         current_piece.rotation -= 1
                 if event.key == pygame.K_p:
                     pause(win, clock)
+                if event.key == pygame.K_ESCAPE:
+                    return
 
         shape_pos = convert_shape_format(current_piece)
 
@@ -520,16 +595,6 @@ def main(win):
             update_score(score)
 
 
-def blit_alpha(target, source, location, opacity):
-    x = location[0]
-    y = location[1]
-    temp = pygame.Surface((source.get_width(), source.get_height())).convert()
-    temp.blit(target, (-x, -y))
-    temp.blit(source, (0, 0))
-    temp.set_alpha(opacity)
-    target.blit(temp, location)
-
-
 def main_menu(win):
     global logo_position_x
     global logo_move_x
@@ -551,7 +616,7 @@ def main_menu(win):
 
     run = True
     while run:
-        
+
         logo_start_x = 0 + logo_position_x
         logo_start_y = 0 + logo_position_y
 
